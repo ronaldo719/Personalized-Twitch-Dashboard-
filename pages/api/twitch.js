@@ -6,6 +6,7 @@ export default async (req, res) => {
     if (req.method === 'POST') {
       const { data } = req.body
 
+
       const channelData = await getTwitchChannel(data)
 
       if (channelData) {
@@ -13,10 +14,10 @@ export default async (req, res) => {
         res.status(200).json({ data: channelData})
       }
 
-      res.status(404).send()
+      // res.status(404).send()
     }
   } catch (error) {
-    console.log(error)
+    console.warn(error.message)
     res.status(500).send()
   }
 }
@@ -35,46 +36,32 @@ const getTwitchAccessToken = async () => {
     return json.access_token
   }
 }
-
-//Actions
+// Actions
 const getTwitchChannel = async channelName => {
-  console.log('SEARCHING FOR TWITCH CHANNEL...')
-  if (channelName) {
-    //Get Access accessToken 
+  console.log("Searching for channel")
+  if (channelName){
     const accessToken = await getTwitchAccessToken()
-    console.log(accessToken)
 
-    if (accessToken) {
-      //Make Query Requst
-      const response = await fetch(`${HOST_NAME}/search/channels?query=${channelName}`, {
+    if (accessToken){
+      const response = await fetch(`${HOST_NAME}/search/channels?query=${channelName}`,{
         headers: {
-          Authorization: `Bearer ${accessToken}`, "Client-Id": process.env.TWITCH_CLIENT_ID
+          Authorization: `Bearer ${accessToken}`,
+          "Client-Id": process.env.TWITCH_CLIENT_ID
         }
       })
-
+      
       const json = await response.json()
-
-      if (json.data) {
-        const { data } = json 
-
+      if (json.data){
+        const {data} = json
         const lowercaseChannelName = channelName.toLowerCase()
-
         const foundChannel = data.find(channel => {
           const lowercaseDisplayName = channel.display_name.toLowerCase()
-
           return lowercaseChannelName === lowercaseDisplayName
         })
-        if (foundChannel) {
-          return foundChannel
-        } else {
-          throw new Error("Channel doesn't exist or not found.")
-        }
-        
+        return foundChannel
       }
     }
-
-    throw new Error("Twitch accessToken was undefined.")
+    throw new Error("Twitch accessToken was undefined")
   }
-
   throw new Error("No channelName provided.")
 }

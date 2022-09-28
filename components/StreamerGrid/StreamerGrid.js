@@ -1,13 +1,21 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Image from 'next/image'
 import styles from '../../styles/StreamerGrid.module.css'
 
 const StreamerGrid = ( { channels, setChannels } ) => {
 
+
+  const renderNoItems = () => (
+    <div className={styles.gridNoItems}>
+      <p>Add a streamer to get started! 😤</p>
+    </div>
+    
+  )
+
 const renderGridItem = channel => (
     <div key={channel.id} className={styles.gridItem}>
-      <Image layout="fill" src={channel.thumbnail_url}/>
       <button onClick={removeChannelAction(channel.id)}>X</button> 
+      <Image layout="fill" src={channel.thumbnail_url}/>
       <div className={styles.gridItemContent}>
     
          <p>{channel.display_name}</p>
@@ -50,19 +58,19 @@ const renderGridItem = channel => (
     }
   }
 
+  //useEffect
+  useEffect(( )=>{
+    console.log('Current channels: ', channels)
+  }, [channels])
 
-const renderNoItems = () => (
-    <div className={styles.gridNoItems}>
-      <p>Add a streamer to get started! 😤</p>
-    </div>
-    
-  )
 
   return (
-     <div>
-       <h2>{`Ronaldo's Twitch Dashboard 😳 `}</h2>
+    <div className={styles.container}>
+    <h2>{`Ronaldo's Twitch Dashboard 😳 `}</h2>
+       <div className={styles.gridContainer}>
       {channels.length > 0 && channels.map(renderGridItem)}
       {channels.length === 0 && renderNoItems()}
+      </div>
     </div>
   )
 }

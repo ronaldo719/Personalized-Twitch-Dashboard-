@@ -8,6 +8,11 @@ const Home = () => {
     //state
    const [favoriteChannels, setFavoriteChannels] = useState([])
 
+    //Fetches channel data when the app loads
+    useEffect(() => {
+      console.log("Fetching Channels...")
+      fetchChannels()
+    }, [])
 
   const addStreamerChannel = async event => {
     // Pervent the page from refreshing
@@ -16,32 +21,29 @@ const Home = () => {
     const { value } = event.target.elements.name
     console.log("value: ", value)
 
-      if (value) {
 
-        // Call Twitch Search API
-        const path = `https://${window.location.hostname}`
+      if (value){
+      
+      // Call Twitch search API
+      const path = `https://${window.location.hostname}`
+      console.log("path is", path)
+      const response = await fetch(`${path}/api/twitch`,{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({data: value})
+      })
+      const json = await response.json()
+      console.log(`Data from server: ${json.data}`)
+      setFavoriteChannels(prevState=> [...prevState, json.data])
 
-        const response = await fetch(`${path}/api/twitch`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }, 
-          body: JSON.stringify({ data: value })
-
-        })
         
-        const json = await response.json()
-
-        console.log("From the server: ", json.data)
-
-        setFavoriteChannels(preState => [...preState, json.data])
-
-        //Set channelName string to DB
-        await setChannel(value)
-
-        event.target.elements.name.value = ""
-      }
+      //Set channelName string to DB
+      await setChannel(value)
+      event.target.elements.name.value = ""
     }
+  }
 
     const setChannel = async channelName => {
       try {
@@ -104,8 +106,8 @@ const Home = () => {
               headers: {
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify({ data: channelData })
-            })
+              body: JSON.stringify({ data: channelName })
+            });
 
             const json = await channelResp.json()
 
@@ -135,18 +137,13 @@ const Home = () => {
 
     )
 
-    //Fetches channel data when the app loads
-    useEffect(() => {
-      console.log("Fetching Channels...")
-      fetchChannels()
-    }, [favoriteChannels])
-
   return (
     <div className={styles.container}>
       <Head>
         <title>🎥 Personal Twitch Dashboard</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
       </Head>
+
       <div className={styles.inputContainer}>
         {renderForm()}
         <StreamerGrid channels={favoriteChannels} setChannels={setFavoriteChannels} />

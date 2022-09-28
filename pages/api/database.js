@@ -1,5 +1,5 @@
 // These are database actions needed to interact with Replit DB!
-// Feel free to see how this works or how to make it better!
+
 const DB_URL = process.env.REPLIT_DB_URL
 
 export default async (req, res) => {
@@ -15,7 +15,22 @@ export default async (req, res) => {
           } else {
             res.status(404).send()
           }
-        } else {
+        } 
+        else if (action === 'DELETE_CHANNEL') { 
+          const keyValue = await getValue("CHANNELS")
+          if (keyValue) {
+            const valArray = keyValue.split(",")
+            const channelIndex = valArray.indexOf(value)
+
+            if (channelIndex !== -1) {
+              valArray.splice(channelIndex, 1)
+            } else {
+              res.status(404).send()
+            }
+            res.status(200).json({ data: valArray.join(",") })
+          }
+        } 
+        else {
           console.log('DB IN SETKEY')
           const success = await setKey(key, value)
           if (success) {
